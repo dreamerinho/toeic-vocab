@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17233f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>토익 단어장 700·800·900</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500;600&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f2f4f8;--card:#fff;--ink:#17233f;--mute:#667089;--line:#d9deea;--acc:#0e7c86;--accbg:#d9f0f1;--bad:#b4401b;--badbg:#fbe4da;--ok:#1d7a4a;--okbg:#dcf2e5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1524;--card:#18203a;--ink:#e8ecf7;--mute:#9aa4c0;--line:#2b3556;--acc:#4cc3cc;--accbg:#14343a;--bad:#f0956f;--badbg:#3b2219;--ok:#6fd29b;--okbg:#17352a}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:19px;margin:4px 0 14px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 8px;min-height:44px}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.modes{display:flex;gap:6px;margin-bottom:14px}.modes button{flex:1;padding:8px 4px;font-size:14px}
+.modes button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.stat{display:flex;justify-content:space-between;color:var(--mute);font-size:13px;margin-bottom:6px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}.bar i{display:block;height:100%;background:var(--acc);transition:width .25s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;min-height:230px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;cursor:pointer}
+.w{font-family:Newsreader,Georgia,"Times New Roman",serif;font-size:42px;font-weight:600;line-height:1.1;word-break:break-word}
+.pos{color:var(--mute);font-size:14px}
+.mean{font-size:24px;font-weight:700;margin-top:6px}
+.ex{color:var(--mute);font-family:Newsreader,Georgia,serif;font-size:17px;max-width:40ch}
+.hint{color:var(--mute);font-size:13px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.actions .no{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.actions .yes{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.sp{background:none;border:none;font-size:22px;min-height:40px;padding:4px 10px}
+.opts{display:grid;gap:8px;margin-top:12px}
+.opts button{text-align:left;padding:13px 14px}
+.opts .right{background:var(--okbg);border-color:var(--ok)}
+.opts .wrong{background:var(--badbg);border-color:var(--bad)}
+.next{width:100%;margin-top:12px;background:var(--acc);border-color:var(--acc);color:#fff}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+li .lw{font-family:Newsreader,Georgia,serif;font-size:20px;font-weight:600}
+li .lm{grid-column:1;color:var(--mute);font-size:14px}
+li .tag{align-self:center;font-size:12px;padding:2px 8px;border-radius:999px}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-bad{background:var(--badbg);color:var(--bad)}
+.empty{text-align:center;padding:40px 10px;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+.foot{margin-top:18px;text-align:center}.foot button{font-size:13px;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>토익 단어장</h1>
+<div class="tabs" id="levels"></div>
+<div class="modes" id="modes"></div>
+<div id="view"></div>
+<div class="foot"><button id="reset">이 레벨 기록 초기화</button></div>
+</main>
+<script>
+// [단어, 품사, 뜻, 예문]
+var D={
+700:[
+["invoice","n.","청구서, 송장","Please send the invoice by Friday."],
+["deadline","n.","마감 기한","The deadline for applications is May 3."],
+["refund","n.","환불","You may request a full refund within 30 days."],
+["itinerary","n.","여행 일정표","The itinerary includes two days in Busan."],
+["vendor","n.","판매업체, 납품업자","We changed our office supplies vendor."],
+["supervisor","n.","감독관, 상사","Please ask your supervisor for approval."],
+["expire","v.","만료되다","The coupon will expire at the end of June."],
+["subscribe","v.","구독하다","Subscribe to our newsletter for updates."],
+["receipt","n.","영수증","Keep the receipt for your records."],
+["shipment","n.","배송(품)","The shipment arrived two days late."],
+["applicant","n.","지원자","Each applicant must submit a résumé."],
+["brochure","n.","안내 책자","The brochure lists all available services."],
+["inventory","n.","재고, 재고 목록","We check our inventory every month."],
+["reimburse","v.","(비용을) 상환하다","The firm will reimburse travel expenses."],
+["postpone","v.","연기하다","The meeting was postponed until Monday."],
+["merchandise","n.","상품","All merchandise is on sale this weekend."],
+["premises","n.","구내, 부지","Smoking is not allowed on the premises."],
+["colleague","n.","동료","I will share the report with my colleagues."],
+["relocate","v.","이전하다","The company plans to relocate to Incheon."],
+["complimentary","adj.","무료의","Complimentary breakfast is served daily."],
+["utility","n.","공공 요금, 공익 설비","Utilities are included in the rent."],
+["warranty","n.","품질 보증(서)","The laptop comes with a two-year warranty."],
+["adjacent","adj.","인접한","The parking lot is adjacent to the main building."],
+["appliance","n.","가전 기기","The store sells kitchen appliances."],
+["outstanding","adj.","뛰어난, 미지불의","Please pay the outstanding balance."],
+["requirement","n.","필수 요건","Fluency in English is a requirement."],
+["personnel","n.","직원, 인사부","All personnel must wear ID badges."],
+["venue","n.","장소, 개최지","The venue can hold 300 guests."],
+["register","v.","등록하다","Please register online before the seminar."],
+["valid","adj.","유효한","A valid passport is required."]
+],
+800:[
+["revenue","n.","수익, 매출","Annual revenue rose by eight percent."],
+["implement","v.","시행하다","The firm will implement the new policy in July."],
+["negotiate","v.","협상하다","They negotiated a lower price with the supplier."],
+["mandatory","adj.","의무적인","Attendance at the workshop is mandatory."],
+["entitle","v.","자격을 주다","Membership entitles you to a discount."],
+["subsidiary","n.","자회사","The subsidiary operates in three countries."],
+["proficiency","n.","숙련도","Proficiency in Spanish is preferred."],
+["undergo","v.","겪다, 거치다","The building will undergo renovation."],
+["feasible","adj.","실현 가능한","The plan is feasible within the budget."],
+["incur","v.","(비용을) 발생시키다","Late payments will incur additional fees."],
+["supplement","n.","보충(물)","A supplement to the manual is attached."],
+["comprehensive","adj.","포괄적인","We offer a comprehensive training program."],
+["allocate","v.","할당하다","Funds were allocated to the marketing team."],
+["prospective","adj.","장래의, 유망한","Prospective clients toured the facility."],
+["diligent","adj.","성실한","She is a diligent and reliable employee."],
+["streamline","v.","간소화하다","The new system streamlines the ordering process."],
+["tenant","n.","세입자","The tenants must sign a one-year lease."],
+["liability","n.","법적 책임, 부채","The company accepts no liability for damage."],
+["disclose","v.","공개하다","Employees may not disclose confidential data."],
+["eligible","adj.","자격이 있는","Full-time staff are eligible for the bonus."],
+["pending","adj.","보류 중인","The contract is still pending approval."],
+["substantial","adj.","상당한","The project requires a substantial investment."],
+["turnover","n.","이직률, 매출액","High staff turnover affects morale."],
+["endorse","v.","지지하다, 보증하다","Several experts endorsed the product."],
+["prerequisite","n.","전제 조건","This course is a prerequisite for the next."],
+["comply","v.","(규칙을) 따르다","All vendors must comply with safety rules."],
+["accommodate","v.","수용하다","The hall can accommodate 500 people."],
+["authorize","v.","승인하다","Only managers can authorize overtime."],
+["renowned","adj.","유명한","The renowned chef opened a new restaurant."],
+["tentative","adj.","잠정적인","We made a tentative agreement."]
+],
+900:[
+["ascertain","v.","확인하다","Please ascertain the cause of the delay."],
+["expedite","v.","신속히 처리하다","We will expedite your order."],
+["concur","v.","동의하다","The board concurred with the proposal."],
+["remittance","n.","송금(액)","Remittance is due within ten days."],
+["lucrative","adj.","수익성이 높은","It was a lucrative business deal."],
+["dwindle","v.","점차 줄어들다","Ticket sales began to dwindle."],
+["amend","v.","수정하다","The contract was amended last week."],
+["preliminary","adj.","예비의","Preliminary results will be released soon."],
+["conducive","adj.","도움이 되는","A quiet space is conducive to learning."],
+["ensuing","adj.","뒤이은","Prices rose in the ensuing months."],
+["forthcoming","adj.","다가오는","Details of the forthcoming event are online."],
+["inaugural","adj.","개막의, 취임의","The inaugural meeting was held in March."],
+["culminate","v.","결국 ~로 끝나다","The project culminated in a product launch."],
+["delegate","v.","위임하다","Managers should delegate routine tasks."],
+["deplete","v.","고갈시키다","Heavy use may deplete our resources."],
+["equitable","adj.","공정한","They proposed an equitable solution."],
+["fluctuate","v.","변동하다","Fuel prices fluctuate throughout the year."],
+["impending","adj.","임박한","The impending storm closed the airport."],
+["lapse","v.","(기한이) 만료되다","The policy lapsed due to non-payment."],
+["mitigate","v.","완화하다","New measures will mitigate the risk."],
+["notwithstanding","prep.","~에도 불구하고","Notwithstanding the cost, we approved it."],
+["obsolete","adj.","구식의","The old software is now obsolete."],
+["pertinent","adj.","관련 있는","Include all pertinent information."],
+["stipulate","v.","규정하다","The contract stipulates a 30-day notice."],
+["unprecedented","adj.","전례 없는","The firm saw unprecedented growth."],
+["warrant","v.","정당화하다","The results warrant further research."],
+["withhold","v.","보류하다, 공제하다","Taxes are withheld from your pay."],
+["vacate","v.","비우다","Guests must vacate rooms by noon."],
+["curtail","v.","축소하다","The firm curtailed its spending."],
+["scrutinize","v.","면밀히 조사하다","Auditors scrutinized the accounts."]
+]};
+var KEY="toeicVocab.v1",S={known:{},wrong:{}};
+try{var raw=localStorage.getItem(KEY);if(raw)S=JSON.parse(raw);S.known=S.known||{};S.wrong=S.wrong||{}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var ALL=[];[700,800,900].forEach(function(l){D[l].forEach(function(r){ALL.push({w:r[0],p:r[1],m:r[2],e:r[3],l:l})})});
+var lv="700",mode="card",queue=[],cur=null,flipped=false,answered=false,opts=[];
+function $(id){return document.getElementById(id)}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pool(){return lv==="wrong"?ALL.filter(function(x){return S.wrong[x.w]}):ALL.filter(function(x){return String(x.l)===lv})}
+function speak(w){try{var u=new SpeechSynthesisUtterance(w);u.lang="en-US";speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function renderTabs(){
+ var L=[["700","700점대"],["800","800점대"],["900","900점대"],["wrong","오답 "+Object.keys(S.wrong).length]];
+ $("levels").innerHTML=L.map(function(x){return '<button data-l="'+x[0]+'" class="'+(lv===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("");
+ var M=[["card","카드"],["quiz","퀴즈"],["list","목록"]];
+ $("modes").innerHTML=M.map(function(x){return '<button data-m="'+x[0]+'" class="'+(mode===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("");
+}
+function build(){
+ var p=pool();
+ queue=shuffle(mode==="card"&&lv!=="wrong"?p.filter(function(x){return !S.known[x.w]}):p);
+ next();
+}
+function next(){cur=queue.shift()||null;flipped=false;answered=false;
+ if(cur&&mode==="quiz"){var d=shuffle(ALL.filter(function(x){return x.w!==cur.w&&x.p===cur.p}));if(d.length<3)d=shuffle(ALL.filter(function(x){return x.w!==cur.w}));opts=shuffle([cur].concat(d.slice(0,3)))}
+ render()}
+function render(){
+ renderTabs();var v=$("view"),p=pool();
+ if(mode==="list"){
+  if(!p.length){v.innerHTML=emptyMsg();return}
+  v.innerHTML='<ul>'+p.map(function(x){return '<li><span class="lw">'+x.w+' <small class="pos">'+x.p+'</small></span><span class="tag '+(S.known[x.w]?"t-ok":S.wrong[x.w]?"t-bad":"")+'">'+(S.known[x.w]?"암기":S.wrong[x.w]?"오답":"")+'</span><span class="lm">'+x.m+'</span></li>'}).join("")+'</ul>';return}
+ var done=p.length-queue.length-(cur?1:0);
+ var known=p.filter(function(x){return S.known[x.w]}).length;
+ var head='<div class="stat"><span>'+(lv==="wrong"?"오답 복습":"암기 "+known+" / "+p.length)+'</span><span>'+(mode==="quiz"?"퀴즈":"카드")+'</span></div><div class="bar"><i style="width:'+(p.length?(lv==="wrong"?0:known/p.length*100):0)+'%"></i></div>';
+ if(!cur){v.innerHTML=head+emptyMsg();return}
+ if(mode==="card"){
+  v.innerHTML=head+'<div class="card" id="card" tabindex="0" role="button" aria-label="카드 뒤집기"><div class="w">'+cur.w+'</div><div class="pos">'+cur.p+'</div>'+
+  (flipped?'<div class="mean">'+cur.m+'</div><div class="ex">'+cur.e+'</div>':'<div class="hint">눌러서 뜻 보기</div>')+
+  '<button class="sp" id="sp" aria-label="발음 듣기">🔊</button></div>'+
+  (flipped?'<div class="actions"><button class="no" id="no">몰라요</button><button class="yes" id="yes">알아요</button></div>':"");
+ }else{
+  v.innerHTML=head+'<div class="card" style="cursor:default"><div class="w">'+cur.w+'</div><div class="pos">'+cur.p+'</div><button class="sp" id="sp" aria-label="발음 듣기">🔊</button></div><div class="opts">'+
+  opts.map(function(o,i){return '<button data-i="'+i+'">'+o.m+'</button>'}).join("")+'</div>'+(answered?'<div class="ex" style="margin-top:10px;text-align:center;max-width:none">'+cur.e+'</div><button class="next" id="nx">다음 단어</button>':"");
+ }
+}
+function emptyMsg(){
+ if(lv==="wrong")return '<div class="empty"><b>오답이 없어요</b>카드나 퀴즈에서 틀린 단어가 여기에 모입니다.</div>';
+ return '<div class="empty"><b>이 레벨 학습을 마쳤어요</b>목록에서 확인하거나 퀴즈로 다시 점검해 보세요.</div>';
+}
+document.addEventListener("click",function(e){
+ var t=e.target.closest("button,#card");if(!t)return;
+ if(t.dataset.l){lv=t.dataset.l;build();return}
+ if(t.dataset.m){mode=t.dataset.m;build();return}
+ if(t.id==="sp"){e.stopPropagation();if(cur)speak(cur.w);return}
+ if(t.id==="card"){flipped=!flipped;render();if(flipped)speak(cur.w);return}
+ if(t.id==="yes"){S.known[cur.w]=1;delete S.wrong[cur.w];save();next();return}
+ if(t.id==="no"){S.wrong[cur.w]=(S.wrong[cur.w]||0)+1;delete S.known[cur.w];save();next();return}
+ if(t.id==="nx"){next();return}
+ if(t.id==="reset"){if(lv==="wrong"){S.wrong={}}else{pool().forEach(function(x){delete S.known[x.w];delete S.wrong[x.w]})}save();build();return}
+ if(t.dataset.i!==undefined&&!answered){
+  answered=true;var o=opts[+t.dataset.i],ok=o.w===cur.w;
+  if(ok){delete S.wrong[cur.w];if(lv!=="wrong")S.known[cur.w]=1}else{S.wrong[cur.w]=(S.wrong[cur.w]||0)+1;delete S.known[cur.w]}
+  save();render();
+  var bs=document.querySelectorAll(".opts button");
+  opts.forEach(function(x,i){if(x.w===cur.w)bs[i].classList.add("right");else if(i===+t.dataset.i)bs[i].classList.add("wrong")});
+ }
+});
+document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="card"){flipped=!flipped;render()}});
+build();
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+</script>
+</body>
+</html>
